@@ -1,0 +1,282 @@
+
+/* Estilos para el módulo de Autenticación (Platform) */
+
+/* GATE ROOT (Platform Guardian) */
+#platform-gate-root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #121212; /* Fondo oscuro sólido para cubrir editor */
+  z-index: 20000; /* Máxima prioridad, sobre todo el editor */
+  display: none; /* Controlado por JS (Guardian) */
+}
+
+/* Cuando el modal está dentro del Gate Root */
+#platform-gate-root .auth-modal-overlay,
+#platform-gate-root .auth-modal-backdrop {
+  position: absolute; /* Relativo al gate root */
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Widget de Usuario (Top Right) */
+#auth-widget {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 9999;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.auth-btn {
+  background: #333;
+  color: white;
+  border: 1px solid #444;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.auth-btn:hover {
+  background: #444;
+}
+
+.auth-btn.logged-in {
+  background: #007bff;
+  border-color: #0056b3;
+}
+
+/* Modal Backdrop */
+.auth-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(3px);
+  display: block;
+  z-index: 9999998;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+.auth-modal-backdrop.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* Modal Overlay */
+.auth-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999999;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+.auth-modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* Modal Card */
+.auth-card {
+  background: #1e1e1e;
+  color: #eee;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  border: 1px solid #333;
+  position: relative;
+  transform: translateY(20px);
+  transition: transform 0.3s;
+}
+
+.auth-modal-overlay.active .auth-card {
+  transform: translateY(0);
+}
+
+/* Gate Mode (Cuando el modal está en modo Gate) */
+.auth-modal-overlay.gate-mode {
+    background: transparent;
+}
+
+.auth-close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.auth-close:hover {
+  color: #fff;
+}
+
+/* Forms */
+.auth-title {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.auth-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.auth-input-group label {
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+.auth-input {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #2a2a2a;
+  color: white;
+  font-size: 1rem;
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.auth-submit-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 10px;
+}
+
+.auth-submit-btn:hover {
+  background: #0056b3;
+}
+
+.auth-submit-btn:disabled {
+  background: #444;
+  cursor: not-allowed;
+}
+
+.auth-footer {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.auth-link {
+  color: #007bff;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.auth-link:hover {
+  color: #0056b3;
+}
+
+.auth-message {
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+  display: none;
+}
+
+.auth-message.error {
+  display: block;
+  background: rgba(255, 0, 0, 0.1);
+  color: #ff6b6b;
+  border: 1px solid #ff6b6b;
+}
+
+.auth-message.success {
+  display: block;
+  background: rgba(0, 255, 0, 0.1);
+  color: #51cf66;
+  border: 1px solid #51cf66;
+}
+
+/* Google Auth */
+.auth-google-btn {
+  background: #fff;
+  color: #333;
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-bottom: 15px;
+  transition: background 0.2s;
+}
+
+.auth-google-btn:hover {
+  background: #f1f1f1;
+}
+
+.auth-separator {
+    text-align: center;
+    margin: 10px 0;
+    color: #666;
+    font-size: 0.8rem;
+    position: relative;
+}
+
+.auth-separator::before, .auth-separator::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 45%;
+    height: 1px;
+    background: #444;
+}
+
+.auth-separator::before { left: 0; }
+.auth-separator::after { right: 0; }

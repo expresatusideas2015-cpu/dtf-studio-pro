@@ -1,0 +1,166 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Expresa Tus Ideas - Editor DTF</title>
+  <link rel="icon" type="image/png" href="logo color expresa.png" />
+  <script>
+    window.ASSET_VERSION = '20260128-1555';
+
+    const iconLink = document.querySelector('link[rel="icon"]');
+    if (iconLink) {
+      iconLink.href = `logo color expresa.png?v=${window.ASSET_VERSION}`;
+    }
+
+    const siteStyles = document.createElement('link');
+    siteStyles.rel = 'stylesheet';
+    siteStyles.href = `styles.css?v=${window.ASSET_VERSION}`;
+    document.head.appendChild(siteStyles);
+
+    const fabricScript = document.createElement('script');
+    fabricScript.src = `https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js?v=${window.ASSET_VERSION}`;
+    document.head.appendChild(fabricScript);
+  </script>
+</head>
+<body>
+  <!-- PLATFORM GATE ROOT: Contenedor para el Access Gate (Login/Bloqueo) -->
+  <div id="platform-gate-root" style="display:block;"></div>
+
+  <div class="container">
+    <aside class="sidebar">
+      <div class="logo-container">
+        <img src="logo color expresa.png" alt="Logo" />
+      </div>
+      <h2>Biblioteca de Diseños</h2>
+
+      <label class="upload-label btn btn-red" style="text-align:center; display:block; padding:10px 12px; border-radius:8px; cursor:pointer;">
+        Subir imágenes
+        <input id="upload-image" type="file" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp" multiple style="display:none;">
+      </label>
+
+      <div id="images-cards-container"></div>
+
+      <div style="color:var(--muted); font-size:0.9rem; margin-top:8px;">
+        <label><input id="global-lock" type="checkbox" checked> Bloquear proporción por defecto</label>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="metrics-bar"> 
+        <div>📏 <strong>Lienzo:</strong> 58 x <span id="cur-h">50</span> cm</div>
+        <div>📐 <strong>Área:</strong> <span id="cur-area">0</span> cm²</div>
+        <div>📐 <strong>Altura usada:</strong> <span id="used-h">0</span> cm</div>
+        <div class="price-tag">TOTAL: $<span id="cur-price">15.000</span></div>
+
+        <button class="btn btn-yellow" onclick="exportPNG()" title="Exportar PNG (transparente)">Exportar PNG</button>
+      </div>
+
+      <!-- ✅ CANVAS AGREGADO AQUÍ -->
+      <div class="canvas-wrapper">
+        <canvas id="c"></canvas>
+      </div>
+
+      <div class="controls-footer">
+        <button class="btn btn-blue" onclick="autoPack()">⚡ Auto-Acomodo (Optimizar)</button>
+        <button class="btn btn-red" onclick="clearAll()">🗑️ Limpiar Todo</button>
+        <button class="btn btn-yellow" onclick="exportPNG()">💾 Exportar PNG</button>
+        
+        <div style="margin-left:auto; display:flex; gap:8px; align-items:center;">
+          <span>Zoom:</span>
+          <button class="btn" onclick="changeZoom(-0.1)">-</button>
+          <span id="zoom-val">100%</span>
+          <button class="btn" onclick="changeZoom(0.1)">+</button>
+        </div>
+      </div>
+    </main>
+
+    <aside class="right-sidebar">
+      <div id="project-system-root">
+        <h3>Proyecto Actual</h3>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button id="btn-save-proj" class="btn btn-blue" style="flex:1; font-size:0.8rem;">Guardar</button>
+          <button id="btn-load-proj" class="btn btn-yellow" style="flex:1; font-size:0.8rem;">Cargar</button>
+          <button id="btn-new-proj" class="btn btn-red" style="flex:1; font-size:0.8rem;">Nuevo</button>
+        </div>
+        <div style="margin-top:8px; font-size:0.8rem; color:#888;">
+          <span id="project-name-display">Sin nombre</span>
+          <span id="save-status" style="margin-left:8px;"></span>
+        </div>
+      </div>
+
+      <div class="prod-switch">
+        <label class="switch-label">Modo Producción</label>
+        <label class="toggle-switch">
+          <input type="checkbox" id="prod-mode-toggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <h3>Capas / Objetos</h3>
+      <div id="layers-container" class="layers-list">
+        <!-- JS injects layers here -->
+      </div>
+      
+      <h3>Propiedades</h3>
+      <div class="file-card">
+        <div class="card-controls">
+          <label>Ancho (cm)<input type="number" id="in-w" onchange="updateSize('w', this.value)"></label>
+          <label>Alto (cm)<input type="number" id="in-h" onchange="updateSize('h', this.value)"></label>
+        </div>
+        <div style="margin-top:8px; display:flex; gap:4px;">
+           <button class="btn-action" onclick="duplicateObj()" title="Duplicar">📑</button>
+           <button class="btn-action" onclick="deleteObj()" title="Eliminar" style="color:red;">🗑️</button>
+           <button class="btn-action" onclick="startCrop()" title="Recortar">✂️</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Modals -->
+  <div id="project-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-content">
+      <h2>Mis Proyectos</h2>
+      <ul id="project-list"></ul>
+      <div style="text-align:right; margin-top:12px;">
+        <button class="btn btn-red" onclick="document.getElementById('project-modal').style.display='none'">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- App + Platform loaders (single version source) -->
+  <script>
+    (() => {
+      const assetVersion = window.ASSET_VERSION || '20260128-1555';
+
+      const importmap = document.createElement('script');
+      importmap.type = 'importmap';
+      importmap.textContent = JSON.stringify({
+        imports: {
+          '/src/platform/auth/authUI.js': `/src/platform/auth/authUI.js?v=${assetVersion}`
+        }
+      });
+      document.head.appendChild(importmap);
+
+      const appScript = document.createElement('script');
+      appScript.type = 'module';
+      appScript.src = `app.js?v=${assetVersion}`;
+      document.body.appendChild(appScript);
+
+      const bootstrapScript = document.createElement('script');
+      bootstrapScript.type = 'module';
+      bootstrapScript.src = `src/platform/bootstrap.js?v=${assetVersion}`;
+      document.body.appendChild(bootstrapScript);
+
+      const imgVersionTargets = ['logo color expresa.png'];
+      document.querySelectorAll('img').forEach((img) => {
+        if (!img.src) return;
+        const src = img.getAttribute('src') || '';
+        if (!imgVersionTargets.includes(src)) return;
+        img.src = `${src}?v=${assetVersion}`;
+      });
+    })();
+  </script>
+</body>
+</html>
+
